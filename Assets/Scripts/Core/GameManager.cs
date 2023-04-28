@@ -39,6 +39,8 @@ namespace Chess.Game {
 		public Board board { get; private set; }
 		Board searchBoard; // Duplicate version of board used for ai search
 
+		public Search search;
+
 		void Start () {
 			//Application.targetFrameRate = 60;
 
@@ -125,6 +127,8 @@ namespace Chess.Game {
 		void LogAIDiagnostics () {
 			string text = "";
 			var d = aiSettings.diagnostics;
+			//int nodes = search.searchDiagnostics.nodes;
+			//int qNodes = search.searchDiagnostics.qNodes;
 			//text += "AI Diagnostics";
 			text += $"<color=#{ColorUtility.ToHtmlStringRGB(colors[3])}>Version 1.0\n";
 			text += $"<color=#{ColorUtility.ToHtmlStringRGB(colors[0])}>Depth Searched: {d.lastCompletedDepth}";
@@ -145,8 +149,12 @@ namespace Chess.Game {
 			}
 			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[1])}>Eval: {evalString}";
 			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Move: {d.moveVal}";
+			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Nodes searched: {d.nodes}";
+            text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Quiescence nodes searched: {d.qNodes}";
 
-			aiDiagnosticsUI.text = text;
+
+            // Debug.Log ($"Num nodes: {numNodes} num Qnodes: {numQNodes} num cutoffs: {numCutoffs} num TThits {numTranspositions}");
+            aiDiagnosticsUI.text = text;
 		}
 
 		public void ExportGame () {

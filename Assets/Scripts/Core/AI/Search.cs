@@ -1,6 +1,7 @@
 ﻿namespace Chess {
 	using System.Collections.Generic;
 	using System.Threading;
+	using Unity.VisualScripting;
 	using UnityEngine;
 	using static System.Math;
 
@@ -28,16 +29,17 @@
 		AISettings settings;
 		Board board;
 		Evaluation evaluation;
+		UIManager uiManager;
 
 		// Diagnostics
 		public SearchDiagnostics searchDiagnostics;
-		int numNodes;
-		int numQNodes;
+		public int numNodes;
+		public int numQNodes;
 		int numCutoffs;
 		int numTranspositions;
 		System.Diagnostics.Stopwatch searchStopwatch;
-
-		public Search (Board board, AISettings settings) {
+		//int assignedDepth;
+        public Search (Board board, AISettings settings) {
 			this.board = board;
 			this.settings = settings;
 			evaluation = new Evaluation ();
@@ -48,10 +50,11 @@
 			int s = TranspositionTable.Entry.GetSize ();
 			//Debug.Log ("TT entry: " + s + " bytes. Total size: " + ((s * transpositionTableSize) / 1000f) + " mb.");
 		}
-
+		
 		public void StartSearch () {
-			InitDebugInfo ();
-
+            //assignedDepth = uiManager.getDepth();
+            InitDebugInfo ();
+			//Debug.Log($"{assignedDepth}");
 			// Initialize search settings
 			bestEvalThisIteration = bestEval = 0;
 			bestMoveThisIteration = bestMove = Move.InvalidMove;
@@ -71,7 +74,13 @@
 			// Iterative deepening. This means doing a full search with a depth of 1, then with a depth of 2, and so on.
 			// This allows the search to be aborted at any time, while still yielding a useful result from the last search.
 			if (settings.useIterativeDeepening) {
-				int targetDepth = (settings.useFixedDepthSearch) ? settings.depth : int.MaxValue;
+                int targetDepth = (settings.useFixedDepthSearch) ? settings.depth : int.MaxValue;
+				//if (uiManager.getDepth() > 0)
+				//{
+				//	targetDepth = uiManager.getDepth();
+				//}
+
+				//Debug.Log($"{uiManager.getDepth()} + {targetDepth}");
 
 				for (int searchDepth = 1; searchDepth <= targetDepth; searchDepth++) {
 					SearchMoves (searchDepth, 0, negativeInfinity, positiveInfinity);
@@ -87,6 +96,8 @@
 						searchDiagnostics.move = bestMove.Name;
 						searchDiagnostics.eval = bestEval;
 						searchDiagnostics.moveVal = Chess.PGNCreator.NotationFromMove (FenUtility.CurrentFen (board), bestMove);
+						searchDiagnostics.nodes = numNodes;
+						searchDiagnostics.qNodes = numQNodes;
 
 						// Exit search if found a mate
 						if (IsMateScore (bestEval) && !settings.endlessSearchMode) {
@@ -251,7 +262,6 @@
 
 		void LogDebugInfo () {
 			AnnounceMate ();
-			// Make this show as UI text
 			Debug.Log ($"Best move: {bestMoveThisIteration.Name} Eval: {bestEvalThisIteration} Search time: {searchStopwatch.ElapsedMilliseconds} ms.");
 			Debug.Log ($"Num nodes: {numNodes} num Qnodes: {numQNodes} num cutoffs: {numCutoffs} num TThits {numTranspositions}");
 		}
@@ -283,6 +293,8 @@
 			public int lastCompletedDepth;
 			public string moveVal;
 			public string move;
+			public int nodes;
+			public int qNodes;
 			public int eval;
 			public bool isBook;
 			public int numPositionsEvaluated;

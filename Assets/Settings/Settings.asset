@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ea222b713a9e459caf3ca327745aa40, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  depth: 1
+  depth: 3
   useIterativeDeepening: 1
   useTranspositionTable: 1
-  useThreading: 0
+  useThreading: 1
   useFixedDepthSearch: 1
   searchTimeMillis: 2000
   endlessSearchMode: 0
@@ -25,9 +25,11 @@ MonoBehaviour:
   maxBookPly: 10
   promotionsToSearch: 2
   diagnostics:
-    lastCompletedDepth: 1
-    moveVal: Bxf5
-    move: c8-f5
-    eval: 180
+    lastCompletedDepth: 2
+    moveVal: Qd7#
+    move: d3-d7
+    nodes: 113
+    qNodes: 1
+    eval: 99999
     isBook: 0
-    numPositionsEvaluated: 48
+    numPositionsEvaluated: 69
