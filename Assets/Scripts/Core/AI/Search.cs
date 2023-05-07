@@ -2,6 +2,7 @@
 	using System.Collections.Generic;
 	using System.Threading;
 	using Unity.VisualScripting;
+	using UnityEditor;
 	using UnityEngine;
 	using static System.Math;
 
@@ -35,6 +36,7 @@
 		public SearchDiagnostics searchDiagnostics;
 		public int numNodes;
 		public int numQNodes;
+		public string currentModeDiag;
 		int numCutoffs;
 		int numTranspositions;
 		System.Diagnostics.Stopwatch searchStopwatch;
@@ -50,7 +52,7 @@
 			int s = TranspositionTable.Entry.GetSize ();
 			//Debug.Log ("TT entry: " + s + " bytes. Total size: " + ((s * transpositionTableSize) / 1000f) + " mb.");
 		}
-		
+
 		public void StartSearch () {
             //assignedDepth = uiManager.getDepth();
             InitDebugInfo ();
@@ -98,6 +100,7 @@
 						searchDiagnostics.moveVal = Chess.PGNCreator.NotationFromMove (FenUtility.CurrentFen (board), bestMove);
 						searchDiagnostics.nodes = numNodes;
 						searchDiagnostics.qNodes = numQNodes;
+						//searchDiagnostics.currentMode = currentModeDiag;
 
 						// Exit search if found a mate
 						if (IsMateScore (bestEval) && !settings.endlessSearchMode) {
@@ -298,6 +301,8 @@
 			public int eval;
 			public bool isBook;
 			public int numPositionsEvaluated;
+			public string currentMode;
+			public int searchTime;
 		}
 
 	}

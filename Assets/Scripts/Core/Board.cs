@@ -189,7 +189,7 @@
 			if (!inSearch) {
 				if (movePieceType == Piece.Pawn || capturedPieceType != Piece.None) {
 					RepetitionPositionHistory.Clear ();
-					fiftyMoveCounter = 0;
+					fiftyMoveCounter = 0; // Clear Fifty move rule counter
 				} else {
 					RepetitionPositionHistory.Push (ZobristKey);
 				}

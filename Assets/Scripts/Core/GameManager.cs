@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 namespace Chess.Game {
@@ -41,9 +42,12 @@ namespace Chess.Game {
 
 		public Search search;
 
+		public string currentModeValue;
+		public int searchTimeValue;
+
 		void Start () {
 			//Application.targetFrameRate = 60;
-
+			aiSettings.diagnostics.currentMode = "None";
 			if (useClocks) {
 				whiteClock.isTurnToMove = false;
 				blackClock.isTurnToMove = false;
@@ -77,9 +81,146 @@ namespace Chess.Game {
 				ExportGame ();
 			}
 
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+				currentModeValue = EasyMode();
+				searchTimeValue = aiSettings.searchTimeMillis;
+            }
+
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                currentModeValue = MediumMode();
+                searchTimeValue = aiSettings.searchTimeMillis;
+            }
+
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                currentModeValue = HardMode();
+                searchTimeValue = aiSettings.searchTimeMillis;
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                currentModeValue = ExpertMode();
+                searchTimeValue = aiSettings.searchTimeMillis;
+            }
+
+			if (Input.GetKeyDown(KeyCode.KeypadPlus))
+			{
+				if (aiSettings.depth <= 10)
+				{
+					aiSettings.depth++; 
+				}
+				else if (aiSettings.depth > 10)
+				{
+					aiSettings.depth = 10;
+				}
+                currentModeValue = "Custom";
+            }
+
+            if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            {
+                if (aiSettings.depth > 1)
+                {
+                    aiSettings.depth--;
+                }
+                else if (aiSettings.depth <= 0)
+                {
+                    aiSettings.depth = 1;
+                }
+				currentModeValue = "Custom";
+            }
+
+            if (Input.GetKeyDown(KeyCode.Comma))
+            {
+                if (aiSettings.searchTimeMillis >= 10000)
+                {
+                    aiSettings.searchTimeMillis = 10000;
+                }
+				else
+				{
+					aiSettings.searchTimeMillis += 50;
+				}
+                searchTimeValue = aiSettings.searchTimeMillis;
+                currentModeValue = "Custom";
+            }
+
+            if (Input.GetKeyDown(KeyCode.Period))
+            {
+				if (aiSettings.searchTimeMillis <= 0)
+				{
+					aiSettings.searchTimeMillis = 50;
+				}
+				else
+				{
+                    aiSettings.searchTimeMillis -= 50;
+                }
+				searchTimeValue = aiSettings.searchTimeMillis;
+                currentModeValue = "Custom";
+            }
+
+			aiSettings.diagnostics.searchTime = searchTimeValue;
+            aiSettings.diagnostics.currentMode = currentModeValue;
+
+        }
+
+        //public bool useIterativeDeepening;
+        //public bool useTranspositionTable;
+
+        //public bool useThreading;
+        //public bool useFixedDepthSearch;
+        //public int searchTimeMillis = 1000;
+        //public bool endlessSearchMode;
+        //public bool clearTTEachMove;
+        string EasyMode()
+		{
+            aiSettings.depth = 2;
+			aiSettings.useIterativeDeepening = true;
+			aiSettings.useTranspositionTable = false;
+			aiSettings.searchTimeMillis = 450;
+			aiSettings.endlessSearchMode = false;
+			aiSettings.clearTTEachMove = false;
+            aiSettings.useBook = false;
+            return "Easy";
 		}
 
-		void OnMoveChosen (Move move) {
+        string MediumMode()
+        {
+            aiSettings.depth = 4;
+            aiSettings.useIterativeDeepening = true;
+            aiSettings.useTranspositionTable = true;
+            aiSettings.searchTimeMillis = 1500;
+            aiSettings.endlessSearchMode = false;
+            aiSettings.clearTTEachMove = false;
+            aiSettings.useBook = false;
+            return "Medium";
+        }
+
+        string HardMode()
+        {
+            aiSettings.depth = 6;
+            aiSettings.useIterativeDeepening = true;
+            aiSettings.useTranspositionTable = true;
+            aiSettings.searchTimeMillis = 3200;
+            aiSettings.endlessSearchMode = false;
+            aiSettings.clearTTEachMove = true;
+            aiSettings.useBook = false;
+            return "Hard";
+        }
+
+        string ExpertMode()
+        {
+            aiSettings.depth = 8;
+            aiSettings.useIterativeDeepening = true;
+            aiSettings.useTranspositionTable = true;
+            aiSettings.searchTimeMillis = 10000;
+            aiSettings.endlessSearchMode = false;
+            aiSettings.clearTTEachMove = true;
+			aiSettings.useBook = true;
+            return "WhySoPro(Expert)";
+        }
+
+        void OnMoveChosen (Move move) {
 			bool animateMove = playerToMove is AIPlayer;
 			board.MakeMove (move);
 			searchBoard.MakeMove (move);
@@ -127,8 +268,6 @@ namespace Chess.Game {
 		void LogAIDiagnostics () {
 			string text = "";
 			var d = aiSettings.diagnostics;
-			//int nodes = search.searchDiagnostics.nodes;
-			//int qNodes = search.searchDiagnostics.qNodes;
 			//text += "AI Diagnostics";
 			text += $"<color=#{ColorUtility.ToHtmlStringRGB(colors[3])}>Version 1.0\n";
 			text += $"<color=#{ColorUtility.ToHtmlStringRGB(colors[0])}>Depth Searched: {d.lastCompletedDepth}";
@@ -149,9 +288,10 @@ namespace Chess.Game {
 			}
 			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[1])}>Eval: {evalString}";
 			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Move: {d.moveVal}";
-			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Nodes searched: {d.nodes}";
-            text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Quiescence nodes searched: {d.qNodes}";
-
+			text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Nodes: {d.nodes}";
+            text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Quiescence nodes: {d.qNodes}";
+            text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[1])}>Current mode: {d.currentMode}";
+            text += $"\n<color=#{ColorUtility.ToHtmlStringRGB(colors[2])}>Limit Search Time(ms): {d.searchTime}";
 
             // Debug.Log ($"Num nodes: {numNodes} num Qnodes: {numQNodes} num cutoffs: {numCutoffs} num TThits {numTranspositions}");
             aiDiagnosticsUI.text = text;

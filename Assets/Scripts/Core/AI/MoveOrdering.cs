@@ -40,7 +40,7 @@ namespace Chess {
 				}
 
 				if (movePieceType == Piece.Pawn) {
-
+					// Promote Pawn to other piece type
 					if (flag == Move.Flag.PromoteToQueen) {
 						score += Evaluation.queenValue;
 					} else if (flag == Move.Flag.PromoteToKnight) {
